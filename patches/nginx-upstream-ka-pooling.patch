@@ -1,5 +1,5 @@
 diff --git a/src/http/modules/ngx_http_upstream_keepalive_module.c b/src/http/modules/ngx_http_upstream_keepalive_module.c
-index 0048e6b..2407b00 100644
+index 0048e6b..3c9aa32 100644
 --- a/src/http/modules/ngx_http_upstream_keepalive_module.c
 +++ b/src/http/modules/ngx_http_upstream_keepalive_module.c
 @@ -31,6 +31,7 @@ typedef struct {
@@ -60,15 +60,17 @@ index 0048e6b..2407b00 100644
          {
              ngx_queue_remove(q);
              ngx_queue_insert_head(&kp->conf->free, q);
-@@ -337,6 +356,12 @@ ngx_http_upstream_free_keepalive_peer(ngx_peer_connection_t *pc, void *data,
+@@ -337,6 +356,14 @@ ngx_http_upstream_free_keepalive_peer(ngx_peer_connection_t *pc, void *data,
  
      item->connection = c;
  
-+    item->server.len = kp->server.len;
-+    item->server.data = ngx_pstrdup(c->pool, &kp->server);
++    if(item->server.data == NULL) {
++        item->server.len = kp->server.len;
++        item->server.data = ngx_pstrdup(c->pool, &kp->server);
 +
-+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-+               "free keepalive peer: setting item server to %s", item->server.data);
++        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
++               "free keepalive peer: setting connection host to %s", item->server.data);
++    }
 +
      pc->connection = NULL;
  
