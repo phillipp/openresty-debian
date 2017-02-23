@@ -1,10 +1,5 @@
 FROM ubuntu:trusty-20170119
 
-ARG DEB_MAJOR
-ARG DEB_MINOR
-ARG DEB_VERSION
-ARG DEB_PACKAGE
-
 # Required system packages
 RUN apt-get update \
     && apt-get install -y \
@@ -21,6 +16,11 @@ RUN apt-get update \
 
 RUN mkdir -p /build/root
 WORKDIR /build
+
+ARG DEB_MAJOR
+ARG DEB_MINOR
+ARG DEB_VERSION
+ARG DEB_PACKAGE
 
 # Download packages
 RUN wget https://openresty.org/download/openresty-$DEB_VERSION.tar.gz \
