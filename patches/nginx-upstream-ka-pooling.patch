@@ -1,5 +1,5 @@
 diff --git a/src/http/modules/ngx_http_upstream_keepalive_module.c b/src/http/modules/ngx_http_upstream_keepalive_module.c
-index 0048e6b..3c9aa32 100644
+index 0048e6b..c533342 100644
 --- a/src/http/modules/ngx_http_upstream_keepalive_module.c
 +++ b/src/http/modules/ngx_http_upstream_keepalive_module.c
 @@ -31,6 +31,7 @@ typedef struct {
@@ -18,35 +18,37 @@ index 0048e6b..3c9aa32 100644
  
      void                              *data;
  
-@@ -189,6 +191,12 @@ ngx_http_upstream_init_keepalive_peer(ngx_http_request_t *r,
+@@ -189,6 +191,14 @@ ngx_http_upstream_init_keepalive_peer(ngx_http_request_t *r,
      kp->original_get_peer = r->upstream->peer.get;
      kp->original_free_peer = r->upstream->peer.free;
  
-+    kp->server.len = r->headers_in.server.len;
-+    kp->server.data = ngx_pstrdup(r->pool, &r->headers_in.server);
++    if(r->headers_in.server.data != NULL) {
++        kp->server.len = r->headers_in.server.len;
++        kp->server.data = ngx_pstrdup(r->pool, &r->headers_in.server);
 +
-+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-+                   "init keepalive peer: host is %s => %s", &r->headers_in.server, &kp->server);
++        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
++                   "init keepalive peer: host %V", &kp->server);
++    }
 +
      r->upstream->peer.data = kp;
      r->upstream->peer.get = ngx_http_upstream_get_keepalive_peer;
      r->upstream->peer.free = ngx_http_upstream_free_keepalive_peer;
-@@ -229,6 +237,9 @@ ngx_http_upstream_get_keepalive_peer(ngx_peer_connection_t *pc, void *data)
+@@ -229,6 +239,9 @@ ngx_http_upstream_get_keepalive_peer(ngx_peer_connection_t *pc, void *data)
  
      cache = &kp->conf->cache;
  
 +    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-+               "get keepalive peer: looking for %s", kp->server.data);
++               "get keepalive peer: looking for %V", &kp->server);
 +
      for (q = ngx_queue_head(cache);
           q != ngx_queue_sentinel(cache);
           q = ngx_queue_next(q))
-@@ -236,9 +247,17 @@ ngx_http_upstream_get_keepalive_peer(ngx_peer_connection_t *pc, void *data)
+@@ -236,9 +249,17 @@ ngx_http_upstream_get_keepalive_peer(ngx_peer_connection_t *pc, void *data)
          item = ngx_queue_data(q, ngx_http_upstream_keepalive_cache_t, queue);
          c = item->connection;
  
-+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-+                   "get keepalive peer: entry %s", item->server.data);
++        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0,
++                   "get keepalive peer: entry %V (%p)", &item->server, item->connection);
 +
          if (ngx_memn2cmp((u_char *) &item->sockaddr, (u_char *) pc->sockaddr,
                           item->socklen, pc->socklen)
@@ -60,16 +62,16 @@ index 0048e6b..3c9aa32 100644
          {
              ngx_queue_remove(q);
              ngx_queue_insert_head(&kp->conf->free, q);
-@@ -337,6 +356,14 @@ ngx_http_upstream_free_keepalive_peer(ngx_peer_connection_t *pc, void *data,
+@@ -337,6 +358,14 @@ ngx_http_upstream_free_keepalive_peer(ngx_peer_connection_t *pc, void *data,
  
      item->connection = c;
  
-+    if(item->server.data == NULL) {
++    if(kp->server.data != NULL) {
 +        item->server.len = kp->server.len;
 +        item->server.data = ngx_pstrdup(c->pool, &kp->server);
 +
 +        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-+               "free keepalive peer: setting connection host to %s", item->server.data);
++               "free keepalive peer: setting connection host to %V", &item->server);
 +    }
 +
      pc->connection = NULL;
