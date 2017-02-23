@@ -4,7 +4,7 @@ set -eux
 DEB_MAJOR=1.11.2
 DEB_MINOR=2
 DEB_VERSION=$DEB_MAJOR.$DEB_MINOR
-DEB_PACKAGE=trafficplex2
+DEB_PACKAGE=trafficplex3
 
 echo "Building $DEB_VERSION-$DEB_PACKAGE.de"
 
