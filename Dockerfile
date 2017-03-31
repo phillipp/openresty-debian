@@ -20,11 +20,12 @@ WORKDIR /build
 ARG DEB_MAJOR
 ARG DEB_MINOR
 ARG DEB_VERSION
-ARG DEB_PACKAGE
 
 # Download packages
 RUN wget https://openresty.org/download/openresty-$DEB_VERSION.tar.gz \
     && tar xfz openresty-$DEB_VERSION.tar.gz
+
+ARG DEB_PACKAGE
 
 ADD patches/* /tmp/patches/
 
