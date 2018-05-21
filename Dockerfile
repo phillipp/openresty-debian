@@ -1,4 +1,4 @@
-FROM ubuntu:trusty-20170119
+FROM ubuntu:trusty
 
 # Required system packages
 RUN apt-get update \
