@@ -1,17 +1,17 @@
 #! /bin/bash
 set -eux
 
-DEB_MAJOR=1.11.2
-DEB_MINOR=2
+DEB_MAJOR=${DEB_MAJOR:-1.11.2}
+DEB_MINOR=${DEB_MINOR:-2}
 DEB_VERSION=$DEB_MAJOR.$DEB_MINOR
 DEB_PACKAGE=trafficplex6
 
 echo "Building $DEB_VERSION-$DEB_PACKAGE.de"
 
-docker build --build-arg DEB_MAJOR=$DEB_MAJOR --build-arg DEB_MINOR=$DEB_MINOR --build-arg DEB_VERSION=$DEB_VERSION --build-arg DEB_PACKAGE=$DEB_PACKAGE -t openresty-bundle-deb .
-CONTAINER=$(docker create openresty-bundle-deb)
+sudo docker build --build-arg DEB_MAJOR=$DEB_MAJOR --build-arg DEB_MINOR=$DEB_MINOR --build-arg DEB_VERSION=$DEB_VERSION --build-arg DEB_PACKAGE=$DEB_PACKAGE -t openresty-bundle-deb .
+CONTAINER=$(sudo docker create openresty-bundle-deb)
 if [ ! -d ./artifacts ]; then
     mkdir ./artifacts
 fi
-docker cp $CONTAINER:/build/openresty_$DEB_VERSION-${DEB_PACKAGE}_amd64.deb ./artifacts/
-docker rm $CONTAINER
+sudo docker cp $CONTAINER:/build/openresty_$DEB_VERSION-${DEB_PACKAGE}_amd64.deb ./artifacts/
+sudo docker rm $CONTAINER
