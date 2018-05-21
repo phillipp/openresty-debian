@@ -7,6 +7,7 @@ DEB_VERSION=$DEB_MAJOR.$DEB_MINOR
 DEB_PACKAGE=trafficplex6
 
 echo "Building $DEB_VERSION-$DEB_PACKAGE.de"
+sudo docker pull ubuntu:trusty
 
 sudo docker build --build-arg DEB_MAJOR=$DEB_MAJOR --build-arg DEB_MINOR=$DEB_MINOR --build-arg DEB_VERSION=$DEB_VERSION --build-arg DEB_PACKAGE=$DEB_PACKAGE -t openresty-bundle-deb .
 CONTAINER=$(sudo docker create openresty-bundle-deb)
