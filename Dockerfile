@@ -82,7 +82,7 @@ RUN cd /build/root \
     && cp /build/nginx-conf/logrotate etc/logrotate.d/nginx
 
 # Build deb
-RUN fpm -s dir -t deb \
+RUN /usr/local/rvm/wrappers/default/fpm -s dir -t deb \
     -n openresty \
     -v $DEB_VERSION-$DEB_PACKAGE \
     -C /build/root \
