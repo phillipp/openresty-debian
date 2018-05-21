@@ -9,4 +9,4 @@ versions = response.body
 v = versions.first
 
 puts "DEB_MAJOR #{v[0]} DEB_MINOR #{v[1]} bash ./build"
-system({ 'DEB_MAJOR' => v[0], 'DEB_MINOR' => v[1] }, 'bash ./build')
+exec({ 'DEB_MAJOR' => v[0], 'DEB_MINOR' => v[1] }, 'bash ./build')
