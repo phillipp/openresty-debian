@@ -1,15 +1,21 @@
 #! /bin/bash
 set -eux
 
-DEB_MAJOR=${DEB_MAJOR:-1.11.2}
-DEB_MINOR=${DEB_MINOR:-2}
-DEB_VERSION=$DEB_MAJOR.$DEB_MINOR
-DEB_PACKAGE=trafficplex6
+DEB_MAJOR="${DEB_MAJOR:-1.11.2}"
+DEB_MINOR="${DEB_MINOR:-2}"
+DEB_VERSION="$DEB_MAJOR.$DEB_MINOR"
+DEB_PACKAGE="trafficplex6"
+OPENSSL_VERSION="1.0.2o"
 
 echo "Building $DEB_VERSION-$DEB_PACKAGE.de"
 sudo docker pull ubuntu:trusty
 
-sudo docker build --build-arg DEB_MAJOR=$DEB_MAJOR --build-arg DEB_MINOR=$DEB_MINOR --build-arg DEB_VERSION=$DEB_VERSION --build-arg DEB_PACKAGE=$DEB_PACKAGE -t openresty-bundle-deb .
+sudo docker build --build-arg DEB_MAJOR=$DEB_MAJOR \
+                  --build-arg DEB_MINOR=$DEB_MINOR \
+                  --build-arg DEB_VERSION=$DEB_VERSION \
+                  --build-arg DEB_PACKAGE=$DEB_PACKAGE \
+                  --build-arg OPENSSL_VERSION=$OPENSSL_VERSION \
+                  -t openresty-bundle-deb .
 CONTAINER=$(sudo docker create openresty-bundle-deb)
 if [ ! -d ./artifacts ]; then
     mkdir ./artifacts

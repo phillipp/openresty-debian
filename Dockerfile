@@ -21,6 +21,21 @@ RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A170311380
 RUN mkdir -p /build/root
 WORKDIR /build
 
+ARG OPENSSL_VERSION
+
+RUN cd /build && \
+    wget --no-verbose https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz && \
+    tar zxf openssl-$OPENSSL_VERSION.tar.gz && \
+    cd openssl-* && \
+    wget https://raw.githubusercontent.com/archlinuxarm/PKGBUILDs/master/core/openssl-1.0/openssl-1.0-versioned-symbols.patch && \
+    patch -p1 < openssl-1.0-versioned-symbols.patch && \
+    wget https://raw.githubusercontent.com/chef/omnibus-software/master/config/patches/openssl/openssl-1.0.1f-do-not-build-docs.patch && \
+    patch -p1 < openssl-1.0.1f-do-not-build-docs.patch && \
+    ./config --prefix=/opt/openssl-$OPENSSL_VERSION --openssldir=/opt/openssl-$OPENSSL_VERSION shared no-idea no-mdc2 no-rc5 no-zlib enable-tlsext no-ssl2 && \
+    make depend && \
+    make install && \
+    cd .. && rm -rf openssl-*
+
 ARG DEB_MAJOR
 ARG DEB_MINOR
 ARG DEB_VERSION
@@ -37,9 +52,11 @@ ADD patches/* /tmp/patches/
 RUN cd /build/openresty-$DEB_VERSION \
     && patch -p1 bundle/nginx-$DEB_MAJOR/src/http/modules/ngx_http_static_module.c < /tmp/patches/openresty-static.patch \
     && patch -p1 bundle/nginx-$DEB_MAJOR/src/http/modules/ngx_http_upstream_keepalive_module.c < /tmp/patches/nginx-upstream-ka-pooling.patch \
-    && ./configure \
+    && PKG_CONFIG_PATH="/opt/openssl-$OPENSSL_VERSION/lib/pkgconfig" ./configure \
         --prefix=/usr/share/nginx \
         -j6 \
+        --with-cc-opt="-I/opt/openssl-$OPENSSL_VERSION/include" \
+        --with-ld-opt="-L/opt/openssl-$OPENSSL_VERSION/lib -Wl,-rpath,/opt/openssl-$OPENSSL_VERSION/lib" \
         --conf-path=/etc/nginx/nginx.conf \
         --error-log-path=/var/log/nginx/error.log \
         --http-client-body-temp-path=/var/lib/nginx/body \
@@ -62,6 +79,9 @@ RUN cd /build/openresty-$DEB_VERSION \
         --with-http_sub_module \
         --with-ipv6 \
     && make -j8 \
+    && echo "Testing that nginx prints version & config..." \
+    && sbin/nginx -V && \
+    && echo "Ok!" \
     && make install DESTDIR=/build/root
 
 COPY scripts/* nginx-scripts/
@@ -75,8 +95,10 @@ RUN cd /build/root \
         var/lib \
         var/lib/nginx \
         usr/sbin \
+        opt \
     && mv usr/share/nginx/nginx/sbin/nginx usr/sbin/nginx && rm -rf usr/share/nginx/nginx/sbin \
     && mv usr/share/nginx/nginx/html usr/share/nginx/html && rm -rf usr/share/nginx/nginx \
+    && mv /opt/openssl-$OPENSSL_VERSION opt \
     && rm -rf etc/nginx \
     && cp /build/nginx-scripts/upstart.conf etc/init/nginx.conf \
     && cp /build/nginx-conf/logrotate etc/logrotate.d/nginx
@@ -106,4 +128,4 @@ RUN /usr/local/rvm/wrappers/default/fpm -s dir -t deb \
     --before-install nginx-scripts/preinstall \
     --after-remove nginx-scripts/postremove \
     --before-remove nginx-scripts/preremove \
-    etc run usr var
+    etc run usr var opt
