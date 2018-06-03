@@ -77,6 +77,7 @@ RUN cd /build/openresty-$DEB_VERSION \
         --with-http_stub_status_module \
         --with-http_ssl_module \
         --with-http_sub_module \
+        --with-http_v2_module \
         --with-ipv6 \
     && make -j8 \
     && make install DESTDIR=/build/root
