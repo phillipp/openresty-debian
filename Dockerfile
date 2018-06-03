@@ -79,9 +79,6 @@ RUN cd /build/openresty-$DEB_VERSION \
         --with-http_sub_module \
         --with-ipv6 \
     && make -j8 \
-    && echo "Testing that nginx prints version & config..." \
-    && sbin/nginx -V \
-    && echo "Ok!" \
     && make install DESTDIR=/build/root
 
 COPY scripts/* nginx-scripts/
