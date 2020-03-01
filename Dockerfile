@@ -27,13 +27,10 @@ RUN cd /build && \
     wget --no-verbose https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz && \
     tar zxf openssl-$OPENSSL_VERSION.tar.gz && \
     cd openssl-* && \
-    wget https://raw.githubusercontent.com/archlinuxarm/PKGBUILDs/master/core/openssl-1.0/openssl-1.0-versioned-symbols.patch && \
-    patch -p1 < openssl-1.0-versioned-symbols.patch && \
-    wget https://raw.githubusercontent.com/chef/omnibus-software/master/config/patches/openssl/openssl-1.0.1f-do-not-build-docs.patch && \
-    patch -p1 < openssl-1.0.1f-do-not-build-docs.patch && \
-    ./config --prefix=/opt/openssl-$OPENSSL_VERSION --openssldir=/opt/openssl-$OPENSSL_VERSION shared no-idea no-mdc2 no-rc5 no-zlib enable-tlsext no-ssl2 && \
+    ./config --prefix=/opt/openssl-$OPENSSL_VERSION --openssldir=/opt/openssl-$OPENSSL_VERSION shared no-idea no-mdc2 no-rc5 no-zlib no-ssl2 && \
     make depend && \
-    make install && \
+    make install_sw && \
+    make install_ssldirs && \
     cd .. && rm -rf openssl-*
 
 ARG DEB_MAJOR
