@@ -4,8 +4,8 @@ set -eux
 DEB_MAJOR="${DEB_MAJOR:-1.13.6}"
 DEB_MINOR="${DEB_MINOR:-2}"
 DEB_VERSION="$DEB_MAJOR.$DEB_MINOR"
-DEB_PACKAGE="trafficplex7"
-OPENSSL_VERSION="1.1.1d"
+DEB_PACKAGE="trafficplex8"
+OPENSSL_VERSION="1.1.1g"
 
 echo "Building $DEB_VERSION-$DEB_PACKAGE.de"
 sudo docker pull ubuntu:trusty
